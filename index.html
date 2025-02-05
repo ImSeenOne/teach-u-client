@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plan de Estudios - Dinámico</title>
+  <!-- Librería para renderizar Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* ======== ESTILOS GENERALES ======== */
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ======== CONTENEDOR PRINCIPAL (ancho fijo responsivo) ======== */
+    #container {
+      width: 100%;
+      max-width: 900px; /* Ajusta el ancho máximo deseado */
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* ======== TÍTULO PRINCIPAL ======== */
+    /* Ahora usaremos #plan-title para colocar el título dinámico */
+    #plan-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+    }
+    #plan-title::before {
+      content: "🎵";
+      font-size: 1.2rem;
+    }
+
+    /* ======== SECCIÓN (Header “azul” + Contenido colapsable) ======== */
+    .section {
+      background: #2c3e50;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      padding: 0.8rem;
+      color: #fff;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .section-checkbox {
+      margin-right: 0.6rem;
+      transform: translateY(1px);
+    }
+    .section-header-text {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .collapse-icon {
+      font-weight: bold;
+      transition: transform 0.3s ease;
+      margin-left: 0.5rem;
+    }
+    /* Al colapsar, rotamos la flecha */
+    .collapsed .collapse-icon {
+      transform: rotate(-90deg);
+    }
+
+    /* ======== CONTENIDO CON TRANSICIÓN (expandir/colapsar suave) ======== */
+    .content-wrapper {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      background: #fff;
+      margin-top: 0.4rem;
+      border-radius: 5px;
+      padding: 0 0.8rem; /* Se quita padding vertical, se ajusta vía inner-content */
+    }
+    .content-wrapper-inner {
+      padding: 0.8rem 0.8rem;
+    }
+    /* Cuando está expandido, le quitamos la clase 'collapsed' y se anima la altura */
+    .content-wrapper:not(.collapsed) {
+      max-height: 2000px; /* “Hack” para la animación */
+    }
+
+    /* ======== INFORMACIÓN DE PROGRESO ======== */
+    .progress-info {
+      font-size: 0.9rem;
+      text-align: right;
+      color: #2c3e50;
+    }
+    .progress-bar-container {
+      background-color: #e9ecef;
+      border-radius: 20px;
+      height: 10px;
+      margin: 0.5rem 0 1rem 0;
+      width: 100%;
+    }
+    .progress-bar-fill {
+      background-color: #3498db;
+      height: 100%;
+      border-radius: 20px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ======== TOPICS ======== */
+    .topic {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .topic-checkbox {
+      margin-right: 0.5rem;
+      transform: translateY(1px);
+    }
+
+    /* ======== SUBTOPICS ======== */
+    .subtopic {
+      margin: 0.5rem 0 1rem 0;
+      padding: 1rem;
+      background: #fff;
+      border-left: 4px solid #3498db;
+      border-radius: 5px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .subtopic-checkbox {
+      margin-right: 0.5rem;
+      transform: translateY(1px);
+    }
+
+    /* ======== RECURSOS ======== */
+    .resources {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #e8f4fc;
+      border-radius: 8px;
+    }
+    .resources a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    .resources a:hover {
+      text-decoration: underline;
+    }
+
+    /* ======== TEXTO MARKDOWN ======== */
+    .markdown-content {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ======== CHECKED STATE ======== */
+    .checked {
+      text-decoration: line-through;
+      color: gray !important;
+    }
+
+    /* ======== MEDIA QUERIES (opcional) ======== */
+    @media (max-width: 600px) {
+      .section {
+        font-size: 0.9rem;
+      }
+      .section-header-text {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <!-- Título dinámico, se rellena desde JS -->
+  <h1 id="plan-title"></h1>
+  <div id="app"></div>
+</div>
+
+<script>
+  // === DATOS DEL PLAN DE ESTUDIOS (con Título Dinámico) ===
+  const studyPlan = {
+    planTitle: "Plan de Estudios de Producción Musical (Versión Dinámica)",  // <--- TÍTULO DINÁMICO
+    sections: [
+      {
+        id: "fundamentals",
+        title: "Fundamentos de Producción Musical (2-3 semanas)",
+        topics: [
+          {
+            title: "Dominio de FL Studio",
+            subtopics: [
+              {
+                title: "Configuración inicial profesional",
+                content: {
+                  explanation: "Configuración avanzada de audio/MIDI: Driver ASIO, buffer size (256-512 samples), perfil MIDI para controladores. Personalización de atajos esenciales (Ctrl+B para pintar, Ctrl+L para lanzador).",
+                  resources: {
+                    wikipedia: [
+                      { name: "FL Studio", url: "https://es.wikipedia.org/wiki/FL_Studio" }
+                    ],
+                    youtube: [
+                      { name: "Configuración FL Studio 21", url: "https://youtu.be/H8Dz3GzO3Y4" }
+                    ],
+                    web: [
+                      { name: "Guía oficial Image-Line", url: "https://www.image-line.com/fl-studio-learning/" }
+                    ]
+                  },
+                  activities: [
+                    "Crear plantilla con buses: Kick, Bass, Leads, FX",
+                    "Configurar estructura de carpetas: Samples > Kicks, Snares, Hi-Hats"
+                  ]
+                }
+              },
+              {
+                title: "Flujo de trabajo avanzado",
+                content: {
+                  explanation: "Organización de proyectos: Convención de nombres profesional (Ej: 'Kick_909_Compressed'), sistema de colores por categoría, gestión de patrones y playlist.",
+                  resources: {
+                    youtube: [
+                      { name: "Workflow profesional", url: "https://youtu.be/9gQZ4lWv0l0" }
+                    ]
+                  },
+                  activities: [
+                    "Implementar color coding: Rojo=Kick, Azul=Bass",
+                    "Practicar combinación de teclas: Ctrl+B, Ctrl+T"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            title: "Teoría Musical Aplicada",
+            subtopics: [
+              {
+                title: "Escalas y progresiones armónicas",
+                content: {
+                  explanation: "Escalas mayores/menores aplicadas al House. Progresiones comunes: I-V-vi-IV (C-G-Am-F). Tensiones armónicas (7mas, 9nas).",
+                  resources: {
+                    wikipedia: [
+                      { name: "Progresión de acordes", url: "https://es.wikipedia.org/wiki/Progresi%C3%B3n_de_acordes" }
+                    ]
+                  },
+                  activities: [
+                    "Crear progresión de 8 compases en C Mayor",
+                    "Armonizar melodía con acordes de 7ma"
+                  ],
+                  examples: [
+                    "Avicii - Levels (A♭-Fm-D♭-E♭)",
+                    "Daft Punk - Digital Love (Bm-D-A-E)"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "synthesis",
+        title: "Síntesis con Vital (3-4 semanas)",
+        topics: [
+          {
+            title: "Dominio de Vital",
+            subtopics: [
+              {
+                title: "Arquitectura del sintetizador",
+                content: {
+                  explanation: "Osciladores (WaveTable, Noise, Sub), Filtros (Multimode, Comb), Modulación (LFOs, Envelopes, Macros).",
+                  resources: {
+                    youtube: [
+                      { name: "Tutorial Vital", url: "https://youtu.be/13X13X13X13X" }
+                    ]
+                  },
+                  activities: [
+                    "Recrear bajo estilo UK Garage",
+                    "Diseñar pad atmosférico con 3 osciladores"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "structure",
+        title: "Estructura Musical (4-5 semanas)",
+        topics: [
+          {
+            title: "Arquitectura de Track",
+            subtopics: [
+              {
+                title: "Estructura clásica de House",
+                content: {
+                  explanation: "Formato AABA: Intro (16 compases), Build-Up (8), Drop (32), Break (16), Outro (16). Elementos de transición (risers, impacts).",
+                  activities: [
+                    "Analizar estructura de 'One More Time' (Daft Punk)",
+                    "Crear mapa de tensión/energía"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "mixing",
+        title: "Mezcla Profesional (4 semanas)",
+        topics: [
+          {
+            title: "Técnicas Avanzadas",
+            subtopics: [
+              {
+                title: "Balance espectral",
+                content: {
+                  explanation: "Pirámide de frecuencias: Subs (20-60Hz), Low-Mids (200-500Hz), Highs (8-20kHz). Técnica 'Carving EQ'.",
+                  activities: [
+                    "Aplicar sidechain con Fruity Limiter",
+                    "Crear cadena de efectos para percusión"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "genres",
+        title: "Exploración de Géneros (6-8 semanas)",
+        topics: [
+          {
+            title: "Deep House",
+            subtopics: [
+              {
+                title: "Elementos característicos",
+                content: {
+                  explanation: "Bajos subsónicos (30-80Hz), pads con movimiento lento, percusión orgánica (shakers, congas), tempo 118-122 BPM.",
+                  activities: [
+                    "Crear loop con bajo Moog-style",
+                    "Diseñar pad con LFO en cutoff"
+                  ],
+                  examples: [
+                    "Disclosure - Latch",
+                    "Kerri Chandler - Atmospheric Beats"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "final-projects",
+        title: "Proyectos Finales (6 semanas)",
+        topics: [
+          {
+            title: "Producción de EP",
+            subtopics: [
+              {
+                title: "Desarrollo de identidad sonora",
+                content: {
+                  explanation: "Creación de 3-5 tracks coherentes con elementos recurrentes y paleta sonora consistente.",
+                  activities: [
+                    "Producir track principal con estructura completa",
+                    "Crear versión radio edit y extended mix"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  // === RENDERIZADO DE SECCIONES Y TEMAS ===
+
+  function renderPlanTitle() {
+    const titleElement = document.getElementById('plan-title');
+    // Asignamos el planTitle del objeto:
+    titleElement.textContent = studyPlan.planTitle;
+  }
+
+  function renderSection(section, sectionIndex) {
+    const container = document.createElement('div');
+
+    // Sección “cabezal azul”
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = 'section';
+    sectionDiv.innerHTML = `
+      <label class="section-header-text">
+        <input type="checkbox" class="section-checkbox" data-section="${sectionIndex}">
+        ${section.title}
+      </label>
+      <span class="collapse-icon">▼</span>
+    `;
+
+    // Contenido colapsable
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'content-wrapper collapsed';
+
+    const contentWrapperInner = document.createElement('div');
+    contentWrapperInner.className = 'content-wrapper-inner';
+
+    // Barra de progreso
+    const progressInfo = document.createElement('div');
+    progressInfo.className = 'progress-info';
+    progressInfo.id = `progress-info-${sectionIndex}`;
+    contentWrapperInner.appendChild(progressInfo);
+
+    const progressBarContainer = document.createElement('div');
+    progressBarContainer.className = 'progress-bar-container';
+    const progressBarFill = document.createElement('div');
+    progressBarFill.className = 'progress-bar-fill';
+    progressBarFill.id = `progress-bar-fill-${sectionIndex}`;
+    progressBarContainer.appendChild(progressBarFill);
+    contentWrapperInner.appendChild(progressBarContainer);
+
+    // Añadimos cada “topic”
+    section.topics.forEach((topic, topicIndex) => {
+      const topicDiv = renderTopic(topic, sectionIndex, topicIndex);
+      contentWrapperInner.appendChild(topicDiv);
+    });
+
+    contentWrapper.appendChild(contentWrapperInner);
+    container.appendChild(sectionDiv);
+    container.appendChild(contentWrapper);
+
+    // Evento para expandir/colapsar
+    sectionDiv.addEventListener('click', (e) => {
+      if (e.target.matches('input[type="checkbox"]')) return; 
+      contentWrapper.classList.toggle('collapsed');
+      container.classList.toggle('collapsed');
+    });
+
+    return container;
+  }
+
+  function renderTopic(topic, sectionIndex, topicIndex) {
+    const topicDiv = document.createElement('div');
+    topicDiv.className = 'topic';
+    topicDiv.innerHTML = `
+      <label>
+        <input type="checkbox" class="topic-checkbox" data-section="${sectionIndex}" data-topic="${topicIndex}">
+        <strong>${topic.title}</strong>
+      </label>
+    `;
+    // Subtemas
+    topic.subtopics.forEach((subtopic, subtopicIndex) => {
+      const subtopicDiv = renderSubtopic(subtopic, sectionIndex, topicIndex, subtopicIndex);
+      topicDiv.appendChild(subtopicDiv);
+    });
+    return topicDiv;
+  }
+
+  function renderSubtopic(subtopic, sectionIndex, topicIndex, subtopicIndex) {
+    const subtopicDiv = document.createElement('div');
+    subtopicDiv.className = 'subtopic';
+    subtopicDiv.innerHTML = `
+      <label>
+        <input type="checkbox"
+               class="subtopic-checkbox"
+               data-section="${sectionIndex}"
+               data-topic="${topicIndex}"
+               data-subtopic="${subtopicIndex}"
+        >
+        ${subtopic.title}
+      </label>
+      <div class="markdown-content">${marked.parse(subtopic.content.explanation)}</div>
+      ${renderResources(subtopic.content.resources)}
+    `;
+    return subtopicDiv;
+  }
+
+  function renderResources(resources) {
+    if (!resources) return '';
+    let output = `<div class="resources"><h4>Recursos</h4>`;
+    if (resources.wikipedia) {
+      resources.wikipedia.forEach(link => {
+        output += `<a href="${link.url}" target="_blank">${link.name}</a><br>`;
+      });
+    }
+    if (resources.youtube) {
+      resources.youtube.forEach(link => {
+        output += `<a href="${link.url}" target="_blank">${link.name}</a><br>`;
+      });
+    }
+    if (resources.web) {
+      resources.web.forEach(link => {
+        output += `<a href="${link.url}" target="_blank">${link.name}</a><br>`;
+      });
+    }
+    output += `</div>`;
+    return output;
+  }
+
+  // === LÓGICA DE PROGRESO Y LOCALSTORAGE ===
+  function updateSectionProgress(sectionIndex) {
+    const subtopicCheckboxes = document.querySelectorAll(`.subtopic-checkbox[data-section="${sectionIndex}"]`);
+    const totalSubtopics = subtopicCheckboxes.length;
+    let checkedSubtopics = 0;
+
+    subtopicCheckboxes.forEach(cb => {
+      if (cb.checked) checkedSubtopics++;
+    });
+
+    const progress = totalSubtopics ? (checkedSubtopics / totalSubtopics) * 100 : 0;
+    const progressBarFill = document.getElementById(`progress-bar-fill-${sectionIndex}`);
+    const progressInfo = document.getElementById(`progress-info-${sectionIndex}`);
+
+    if (progressBarFill) {
+      progressBarFill.style.width = `${progress}%`;
+    }
+
+    if (progressInfo) {
+      progressInfo.textContent = `Progreso: ${checkedSubtopics} / ${totalSubtopics} subtemas`;
+    }
+  }
+
+  function saveProgressToLocalStorage() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    let state = [];
+
+    checkboxes.forEach(checkbox => {
+      state.push({
+        name: checkbox.className,
+        section: checkbox.dataset.section,
+        topic: checkbox.dataset.topic,
+        subtopic: checkbox.dataset.subtopic,
+        checked: checkbox.checked
+      });
+    });
+
+    localStorage.setItem('studyPlanState', JSON.stringify(state));
+  }
+
+  function loadProgressFromLocalStorage() {
+    const savedState = localStorage.getItem('studyPlanState');
+    if (!savedState) return;
+
+    const stateArray = JSON.parse(savedState);
+    stateArray.forEach(item => {
+      let selector = '';
+      if (item.name.includes('section-checkbox')) {
+        selector = `.section-checkbox[data-section="${item.section}"]`;
+      } else if (item.name.includes('topic-checkbox')) {
+        selector = `.topic-checkbox[data-section="${item.section}"][data-topic="${item.topic}"]`;
+      } else if (item.name.includes('subtopic-checkbox')) {
+        selector = `.subtopic-checkbox[data-section="${item.section}"][data-topic="${item.topic}"][data-subtopic="${item.subtopic}"]`;
+      }
+      const cb = document.querySelector(selector);
+      if (cb) {
+        cb.checked = item.checked;
+      }
+    });
+  }
+
+  function setupCheckboxLogic() {
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('.subtopic-checkbox')) {
+        const { section, topic } = e.target.dataset;
+        const topicCheckbox = document.querySelector(`.topic-checkbox[data-section="${section}"][data-topic="${topic}"]`);
+        const allSubtopics = document.querySelectorAll(`.subtopic-checkbox[data-section="${section}"][data-topic="${topic}"]`);
+        const allSubtopicsChecked = [...allSubtopics].every(cb => cb.checked);
+        topicCheckbox.checked = allSubtopicsChecked;
+        topicCheckbox.parentElement.classList.toggle('checked', allSubtopicsChecked);
+
+        const sectionCheckbox = document.querySelector(`.section-checkbox[data-section="${section}"]`);
+        const allTopics = document.querySelectorAll(`.topic-checkbox[data-section="${section}"]`);
+        const allTopicsChecked = [...allTopics].every(cb => cb.checked);
+        sectionCheckbox.checked = allTopicsChecked;
+        sectionCheckbox.parentElement.classList.toggle('checked', allTopicsChecked);
+
+        updateSectionProgress(section);
+        saveProgressToLocalStorage();
+
+      } else if (e.target.matches('.topic-checkbox')) {
+        const { section, topic } = e.target.dataset;
+        const subtopics = document.querySelectorAll(`.subtopic-checkbox[data-section="${section}"][data-topic="${topic}"]`);
+        subtopics.forEach(sb => {
+          sb.checked = e.target.checked;
+        });
+        e.target.parentElement.classList.toggle('checked', e.target.checked);
+
+        const sectionCheckbox = document.querySelector(`.section-checkbox[data-section="${section}"]`);
+        const allTopics = document.querySelectorAll(`.topic-checkbox[data-section="${section}"]`);
+        const allTopicsChecked = [...allTopics].every(cb => cb.checked);
+        sectionCheckbox.checked = allTopicsChecked;
+        sectionCheckbox.parentElement.classList.toggle('checked', allTopicsChecked);
+
+        updateSectionProgress(section);
+        saveProgressToLocalStorage();
+
+      } else if (e.target.matches('.section-checkbox')) {
+        const { section } = e.target.dataset;
+        const topics = document.querySelectorAll(`.topic-checkbox[data-section="${section}"]`);
+        const subtopics = document.querySelectorAll(`.subtopic-checkbox[data-section="${section}"]`);
+        topics.forEach(tp => {
+          tp.checked = e.target.checked;
+          tp.parentElement.classList.toggle('checked', e.target.checked);
+        });
+        subtopics.forEach(sb => {
+          sb.checked = e.target.checked;
+        });
+        e.target.parentElement.classList.toggle('checked', e.target.checked);
+
+        updateSectionProgress(section);
+        saveProgressToLocalStorage();
+      }
+    });
+  }
+
+  // === INICIALIZACIÓN AL CARGAR LA PÁGINA ===
+  document.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+
+    // 1) Renderizamos el Título desde studyPlan
+    renderPlanTitle();
+
+    // 2) Renderizamos cada sección
+    studyPlan.sections.forEach((section, index) => {
+      app.appendChild(renderSection(section, index));
+    });
+
+    // 3) Cargamos estado de localStorage (checkmarks)
+    loadProgressFromLocalStorage();
+
+    // 4) Actualizamos las barras de progreso después de cargar
+    studyPlan.sections.forEach((_, index) => {
+      updateSectionProgress(index);
+    });
+
+    // 5) Configuramos la lógica de checkboxes
+    setupCheckboxLogic();
+  });
+</script>
+
+</body>
+</html>
