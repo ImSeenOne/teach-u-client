@@ -1,86 +1,59 @@
-# Proyecto Web Genérico (Secciones, Tópicos y Checklists)
+# TeachUClient
 
-Este proyecto consiste en una **página web interactiva** que muestra secciones, tópicos y subtemas a partir de un objeto JSON.  
-El contenido se puede **expandir y colapsar**, y permite **marcar** cada subtema (checkbox) para llevar el registro de progreso.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.5.
 
-## Características principales
+## Development server
 
-1. **Contenido Dinámico desde JSON**  
-   - El proyecto obtiene su contenido de un objeto JSON, que contiene secciones, tópicos y subtemas.  
-   - Es muy sencillo **cambiar o personalizar** la información (temáticas, títulos, actividades, recursos...) editando directamente la estructura JSON en el archivo JavaScript.
+To start a local development server, run:
 
-2. **Título Principal Personalizable**  
-   - El `<h1>` de la página se genera dinámicamente a partir de una propiedad (por ejemplo, `planTitle`) dentro del JSON.  
-   - Facilita renombrar o cambiar el tema sin tocar el HTML.
+```bash
+ng serve
+```
 
-3. **Expandir/Colapsar Secciones**  
-   - Cada sección tiene un encabezado con un **checkbox** y una **flecha** que rota cuando se colapsa/expande.  
-   - Al hacer clic en el encabezado (exceptuando el checkbox), el contenido se oculta o se muestra con una **animación suave**.
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-4. **Checklists Interconectados**  
-   - Al marcar un subtema, se verifica si todos los subtemas están marcados para auto-marcar el tópico.  
-   - Al marcar un tópico, todos sus subtemas se marcan.  
-   - Al marcar una sección entera, se marcan todos sus tópicos y subtemas.
+## Code scaffolding
 
-5. **Barra de Progreso**  
-   - Cada sección muestra cuántos subtemas están completados y lo refleja en una **barra de progreso** que se actualiza dinámicamente.
+Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
 
-6. **Persistencia en Local Storage**  
-   - El estado de los checkboxes se **guarda automáticamente** en el navegador, para que al recargar la página no se pierda la información de qué está completo y qué no.
+```bash
+ng generate component component-name
+```
 
-7. **Diseño Responsivo**  
-   - El contenedor principal tiene un `max-width` para no desbordar pantallas grandes.  
-   - En pantallas pequeñas, el diseño se ajusta a todo el ancho disponible sin desbordarse.
+For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-## Cómo usar este proyecto
+```bash
+ng generate --help
+```
 
-1. **Clonar o Descargar**  
-   - Clona este repositorio o descárgalo como .zip.  
-   - Descomprime en tu carpeta preferida.
+## Building
 
-2. **Abrir `index.html`**  
-   - Puedes abrir el archivo `index.html` directamente en el navegador (por ejemplo, arrastrándolo a Chrome/Firefox).  
-   - Verás la página con los títulos de sección, subtemas y checkboxes.
+To build the project run:
 
-3. **Personalizar el Contenido (JSON)**  
-   - Dentro del archivo HTML, busca la porción de código JavaScript donde se encuentra el objeto principal (por defecto se llama `studyPlan` en el ejemplo).  
-   - Edita sus propiedades para cambiar:
-     - `planTitle`: Título general que se muestra en `<h1>`.  
-     - `sections`: Lista de secciones (cada una con `title`, `topics`, `subtopics`, `content`, etc.).  
-   - Añade o elimina secciones, tópicos o subtemas según tus necesidades.
+```bash
+ng build
+```
 
-4. **Personalizar Estilos (CSS)**  
-   - Si deseas modificar colores, tipografías o animaciones, revisa el bloque `<style>` (o el archivo CSS externo, si se ha separado).  
-   - El contenedor principal `#container` usa `max-width: 900px;` para un ancho fijo pero responsivo. Ajusta ese valor si lo prefieres.
+This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
-5. **Función de Guardado (Local Storage)**  
-   - No necesitas configurar nada extra para la persistencia: automáticamente se guardan los checkboxes.  
-   - Si deseas reiniciar el progreso, limpia los datos del navegador (Local Storage).
+## Running unit tests
 
-## Ejemplo de Estructura JSON
+To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
 
-```js
-const studyPlan = {
-  planTitle: "Título Genérico o Nombre del Proyecto",
-  sections: [
-    {
-      id: "una-seccion",
-      title: "Título de la Sección",
-      topics: [
-        {
-          title: "Título de un Tópico",
-          subtopics: [
-            {
-              title: "Subtema 1",
-              content: {
-                explanation: "Explicación o descripción.",
-                resources: { /* Enlaces a sitios web, videos, etc. */ },
-                activities: [ /* Lista de actividades recomendadas */ ]
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
+```bash
+ng test
+```
+
+## Running end-to-end tests
+
+For end-to-end (e2e) testing, run:
+
+```bash
+ng e2e
+```
+
+Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+
+## Additional Resources
+
+For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
