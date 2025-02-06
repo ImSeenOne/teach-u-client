@@ -1,0 +1,96 @@
+.plan-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.plan-container .plan-title {
+  font-size: 1.7rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Wrap each section in a box with a little border */
+.section-wrapper {
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+/* The clickable header at the top (blue background, white text, etc.) */
+.section-header {
+  background: #2c3e50;
+  color: #fff;
+  padding: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.section-header input[type='checkbox'] {
+  margin-right: 0.5rem;
+}
+
+.arrow {
+  font-weight: bold;
+}
+
+/* The main content that can collapse via max-height trick */
+.section-content {
+  transition: max-height 0.3s ease;
+  max-height: 1000px;
+  overflow: hidden;
+  background: #fff;
+  padding: 0.8rem;
+}
+
+/* Collapsed state: set max-height to 0, remove vertical padding if you want. */
+.section-content.collapsed {
+  max-height: 0;
+  padding: 0 0.8rem;
+}
+
+.progress-info {
+  text-align: right;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.progress-bar-container {
+  background-color: #e9ecef;
+  border-radius: 20px;
+  height: 10px;
+  margin: 0.5rem 0 1rem 0;
+  width: 100%;
+}
+
+.progress-bar-fill {
+  background-color: #3498db;
+  height: 100%;
+  border-radius: 20px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+/* Each topic is a slightly gray box inside the section */
+.topic {
+  background: #f8f9fa;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Each subtopic is an even lighter box with a colored border on the left */
+.subtopic {
+  margin: 0.5rem 0 1rem 0;
+  padding: 0.8rem;
+  border-left: 4px solid #3498db;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-content {
+  margin-top: 0.5rem;
+}

@@ -1,0 +1,68 @@
+<!-- plan.component.html -->
+<div class="plan-container">
+  <div class="plan-title">{{ studyPlan?.planTitle }}</div>
+
+  <!-- For each Section -->
+  <div
+    class="section-wrapper"
+    *ngFor="let section of studyPlan.sections; let sIndex = index"
+  >
+    <!-- Section header and checkbox -->
+    <div class="section-header" (click)="toggleSection(sIndex)">
+      <label (click)="$event.stopPropagation()">
+        <input
+          type="checkbox"
+          [checked]="isSectionChecked(sIndex)"
+          (change)="onSectionCheckboxChange(sIndex, $event)"
+        />
+        {{ section.title }}
+      </label>
+      <span class="arrow">{{ openedSections[sIndex] ? '▼' : '▶' }}</span>
+    </div>
+
+    <!-- Collapsible content -->
+    <div class="section-content" [class.collapsed]="!openedSections[sIndex]">
+      <!-- Progress bar / info -->
+      <div class="progress-info">
+        Progress: {{ sectionProgress[sIndex].checked }}/
+        {{ sectionProgress[sIndex].total }} subtopics
+      </div>
+      <div class="progress-bar-container">
+        <div
+          class="progress-bar-fill"
+          [style.width.%]="getProgressPercent(sIndex)"
+        ></div>
+      </div>
+
+      <!-- Topics within this section -->
+      <div class="topic" *ngFor="let topic of section.topics; let tIndex = index">
+        <label>
+          <input
+            type="checkbox"
+            [checked]="isTopicChecked(sIndex, tIndex)"
+            (change)="onTopicCheckboxChange(sIndex, tIndex, $event)"
+          />
+          <strong>{{ topic.title }}</strong>
+        </label>
+
+        <!-- Subtopics in this topic -->
+        <div
+          class="subtopic"
+          *ngFor="let subtopic of topic.subtopics; let subI = index"
+        >
+          <label>
+            <input
+              type="checkbox"
+              [checked]="isSubtopicChecked(sIndex, tIndex, subI)"
+              (change)="onSubtopicCheckboxChange(sIndex, tIndex, subI, $event)"
+            />
+            {{ subtopic.title }}
+          </label>
+          <div class="markdown-content">
+            {{ subtopic.content.explanation }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
