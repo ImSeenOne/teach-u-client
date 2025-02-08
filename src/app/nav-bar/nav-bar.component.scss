@@ -1,43 +1,34 @@
-/* The main container for our minimalistic, floating nav-bar */
 .navbar-container {
-  position: relative; /* or 'fixed' if you want it always visible */
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 80%;
-  margin: 1rem auto;               /* Center it horizontally */
+  margin: 1rem auto;
   padding: 0.75rem 1rem;
-  border-radius: 30px;             /* Rounded corners like a search bar */
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16); /* Subtle shadow for “floating” look */
-  background: #fff;                /* White background so it “floats” */
-}
+  border-radius: 30px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  background: #fff;
 
-/* The UL with 3 items, spaced evenly */
-.navbar-container ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex: 1;
-  justify-content: space-evenly;  /* Even distribution for each item */
-  align-items: center;
-}
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex: 1;
+    justify-content: space-evenly;
+    align-items: center;
 
-/* Each item is a “button” with no background */
-.navbar-container li {
-  cursor: pointer;
-  color: #444;             /* Dark gray by default */
-  text-transform: uppercase;  /* Show text in uppercase via CSS */
-  transition: color 0.2s ease-in-out;
-}
+    li {
+      cursor: pointer;
+      color: #444;
+      text-transform: uppercase;
+      transition: color 0.2s ease-in-out;
 
-/* Different text colors on hover for each item */
-.navbar-container li:nth-child(1):hover {
-  color: blue;
-}
-.navbar-container li:nth-child(2):hover {
-  color: black;
-}
-.navbar-container li:nth-child(3):hover {
-  color: green;
+      // Hover en cada ítem
+      &:nth-child(1):hover { color: blue; }
+      &:nth-child(2):hover { color: black; }
+      &:nth-child(3):hover { color: green; }
+    }
+  }
 }

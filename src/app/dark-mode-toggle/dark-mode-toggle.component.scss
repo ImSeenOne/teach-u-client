@@ -1,0 +1,29 @@
+.dark-mode-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 50px;
+  background: #f2f2f2;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #e2e2e2;
+  }
+}
+
+/* Reglas globales para .dark-mode en body */
+body.dark-mode {
+  background-color: #212121;
+  color: #eaeaea;
+
+  /* Ejemplo para links */
+  a {
+    color: #cccccc;
+  }
+}

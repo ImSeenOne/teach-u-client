@@ -1,13 +1,11 @@
-<!-- plan.component.html -->
 <div class="plan-container">
-  <div class="plan-title">{{ studyPlan?.planTitle }}</div>
+  <h2>{{ studyPlan?.planTitle }}</h2>
 
-  <!-- For each Section -->
   <div
     class="section-wrapper"
     *ngFor="let section of studyPlan.sections; let sIndex = index"
   >
-    <!-- Section header and checkbox -->
+    <!-- Encabezado colapsable -->
     <div class="section-header" (click)="toggleSection(sIndex)">
       <label (click)="$event.stopPropagation()">
         <input
@@ -20,12 +18,11 @@
       <span class="arrow">{{ openedSections[sIndex] ? '▼' : '▶' }}</span>
     </div>
 
-    <!-- Collapsible content -->
+    <!-- Contenido colapsable -->
     <div class="section-content" [class.collapsed]="!openedSections[sIndex]">
-      <!-- Progress bar / info -->
+      <!-- Info y barra de progreso -->
       <div class="progress-info">
-        Progress: {{ sectionProgress[sIndex].checked }}/
-        {{ sectionProgress[sIndex].total }} subtopics
+        Progreso: {{ sectionProgress[sIndex].checked }}/{{ sectionProgress[sIndex].total }} subtemas
       </div>
       <div class="progress-bar-container">
         <div
@@ -34,7 +31,7 @@
         ></div>
       </div>
 
-      <!-- Topics within this section -->
+      <!-- Temas -->
       <div class="topic" *ngFor="let topic of section.topics; let tIndex = index">
         <label>
           <input
@@ -45,11 +42,7 @@
           <strong>{{ topic.title }}</strong>
         </label>
 
-        <!-- Subtopics in this topic -->
-        <div
-          class="subtopic"
-          *ngFor="let subtopic of topic.subtopics; let subI = index"
-        >
+        <div class="subtopic" *ngFor="let subtopic of topic.subtopics; let subI = index">
           <label>
             <input
               type="checkbox"

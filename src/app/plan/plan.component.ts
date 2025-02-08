@@ -2,76 +2,52 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { StudyPlanService, StudyPlan } from './study-plan.service';
 
-/**
- * PlanComponent (standalone)
- * - Displays the entire study plan
- * - Manages checkboxes for sections, topics, subtopics
- * - Tracks progress and saves state in localStorage
- */
 @Component({
   selector: 'app-plan',
   standalone: true,
-  imports: [CommonModule], // Needed for *ngFor, *ngIf, etc.
+  imports: [CommonModule],
   templateUrl: './plan.component.html',
-  styleUrls: ['./plan.component.scss'],
+  styleUrls: ['./plan.component.scss']
 })
 export class PlanComponent implements OnInit {
   studyPlan!: StudyPlan;
 
-  // Tracks which sections are expanded (true = expanded)
   openedSections: boolean[] = [];
-
-  // Each section: how many subtopics are checked vs total
   sectionProgress: { checked: number; total: number }[] = [];
 
   constructor(private studyPlanService: StudyPlanService) {}
 
   ngOnInit(): void {
-    // 1) Load the plan data from the service
+    // 1) Cargamos plan desde el servicio
     this.studyPlan = this.studyPlanService.getPlan();
 
-    // 2) Initialize expansions (collapsed by default)
+    // 2) Expandido/cerrado por defecto
     this.openedSections = this.studyPlan.sections.map(() => false);
 
-    // 3) Initialize progress counters
-    this.sectionProgress = this.studyPlan.sections.map(() => ({
-      checked: 0,
-      total: 0,
-    }));
+    // 3) Contadores de progreso
+    this.sectionProgress = this.studyPlan.sections.map(() => ({ checked: 0, total: 0 }));
 
-    // 4) Count how many subtopics in each section
-    this.studyPlan.sections.forEach((section, sIndex) => {
+    // 4) Contamos subtemas
+    this.studyPlan.sections.forEach((section, i) => {
       let total = 0;
-      section.topics.forEach((topic) => {
-        total += topic.subtopics.length;
-      });
-      this.sectionProgress[sIndex].total = total;
+      section.topics.forEach(topic => total += topic.subtopics.length);
+      this.sectionProgress[i].total = total;
     });
 
-    // 5) Load expansions (and subtopic checks) from localStorage if present
+    // 5) Cargar checks previos
     this.loadStateFromLocalStorage();
 
-    // 6) Refresh progress after loading
+    // 6) Actualizar barra de progreso
     this.updateAllSectionProgress();
   }
 
-  /**
-   * Toggle expansion for a given section
-   */
-  toggleSection(sectionIndex: number): void {
+  toggleSection(sectionIndex: number) {
     this.openedSections[sectionIndex] = !this.openedSections[sectionIndex];
-    // Optionally save expansions right away
     this.saveStateToLocalStorage();
   }
 
-  /**
-   * Handle the section-level checkbox (marks/unmarks all subtopics in that section)
-   */
   onSectionCheckboxChange(sectionIndex: number, event: Event) {
-    // Cast to HTMLInputElement | null
-    const input = event.target as HTMLInputElement | null;
-    if (!input) return; // If for some reason event.target is null or not <input>, exit.
-
+    const input = event.target as HTMLInputElement;
     const checked = input.checked;
 
     const section = this.studyPlan.sections[sectionIndex];
@@ -85,13 +61,8 @@ export class PlanComponent implements OnInit {
     this.saveStateToLocalStorage();
   }
 
-  /**
-   * Handle the topic-level checkbox (marks/unmarks all subtopics in that topic)
-   */
   onTopicCheckboxChange(sectionIndex: number, topicIndex: number, event: Event) {
-    const input = event.target as HTMLInputElement | null;
-    if (!input) return;
-
+    const input = event.target as HTMLInputElement;
     const checked = input.checked;
 
     const topic = this.studyPlan.sections[sectionIndex].topics[topicIndex];
@@ -103,18 +74,13 @@ export class PlanComponent implements OnInit {
     this.saveStateToLocalStorage();
   }
 
-  /**
-   * Handle a single subtopic checkbox
-   */
   onSubtopicCheckboxChange(
     sectionIndex: number,
     topicIndex: number,
     subIndex: number,
     event: Event
   ) {
-    const input = event.target as HTMLInputElement | null;
-    if (!input) return;
-
+    const input = event.target as HTMLInputElement;
     const checked = input.checked;
 
     this.setSubtopicChecked(sectionIndex, topicIndex, subIndex, checked);
@@ -122,50 +88,27 @@ export class PlanComponent implements OnInit {
     this.saveStateToLocalStorage();
   }
 
-  /**
-   * Determine if an entire section is checked (all subtopics in it)
-   */
   isSectionChecked(sectionIndex: number): boolean {
     const section = this.studyPlan.sections[sectionIndex];
     return section.topics.every((topic, tIndex) =>
-      topic.subtopics.every((_, sIndex) =>
-        this.getSubtopicChecked(sectionIndex, tIndex, sIndex)
-      )
+      topic.subtopics.every((_, sIndex) => this.getSubtopicChecked(sectionIndex, tIndex, sIndex))
     );
   }
 
-  /**
-   * Determine if a whole topic is checked
-   */
   isTopicChecked(sectionIndex: number, topicIndex: number): boolean {
     const topic = this.studyPlan.sections[sectionIndex].topics[topicIndex];
-    return topic.subtopics.every((_, sIndex) =>
-      this.getSubtopicChecked(sectionIndex, topicIndex, sIndex)
-    );
+    return topic.subtopics.every((_, sIndex) => this.getSubtopicChecked(sectionIndex, topicIndex, sIndex));
   }
 
-  /**
-   * Determine if a single subtopic is checked
-   */
   isSubtopicChecked(sectionIndex: number, topicIndex: number, subIndex: number): boolean {
     return this.getSubtopicChecked(sectionIndex, topicIndex, subIndex);
   }
 
-  /**
-   * Read from localStorage whether a subtopic is checked
-   */
-  private getSubtopicChecked(
-    sectionIndex: number,
-    topicIndex: number,
-    subIndex: number
-  ): boolean {
+  private getSubtopicChecked(sectionIndex: number, topicIndex: number, subIndex: number): boolean {
     const key = this.makeKey(sectionIndex, topicIndex, subIndex);
     return localStorage.getItem(key) === 'true';
   }
 
-  /**
-   * Save the subtopic's check state to localStorage
-   */
   private setSubtopicChecked(
     sectionIndex: number,
     topicIndex: number,
@@ -176,16 +119,10 @@ export class PlanComponent implements OnInit {
     localStorage.setItem(key, String(checked));
   }
 
-  /**
-   * Build a unique localStorage key for each subtopic
-   */
   private makeKey(sectionIndex: number, topicIndex: number, subIndex: number): string {
     return `teach-u-client_${sectionIndex}_${topicIndex}_${subIndex}`;
   }
 
-  /**
-   * Update progress info for one section
-   */
   updateSectionProgress(sectionIndex: number) {
     const section = this.studyPlan.sections[sectionIndex];
     let checkedCount = 0;
@@ -204,25 +141,16 @@ export class PlanComponent implements OnInit {
     this.sectionProgress[sectionIndex].total = totalCount;
   }
 
-  /**
-   * Update progress for all sections
-   */
   updateAllSectionProgress() {
-    this.studyPlan.sections.forEach((_, sIndex) => {
-      this.updateSectionProgress(sIndex);
+    this.studyPlan.sections.forEach((_, i) => {
+      this.updateSectionProgress(i);
     });
   }
 
-  /**
-   * Save expansions to localStorage
-   */
   saveStateToLocalStorage() {
     localStorage.setItem('openedSections', JSON.stringify(this.openedSections));
   }
 
-  /**
-   * Load expansions from localStorage (subtopic checks are loaded on the fly)
-   */
   loadStateFromLocalStorage() {
     const expansions = localStorage.getItem('openedSections');
     if (expansions) {
@@ -230,9 +158,6 @@ export class PlanComponent implements OnInit {
     }
   }
 
-  /**
-   * A helper for the percentage used in the progress bar
-   */
   getProgressPercent(sectionIndex: number): number {
     const { checked, total } = this.sectionProgress[sectionIndex];
     return total === 0 ? 0 : (checked / total) * 100;

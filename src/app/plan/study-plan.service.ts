@@ -1,35 +1,28 @@
-import {Injectable} from '@angular/core';
-
-export interface Link {
-  name: string;
-  url: string;
-}
-
+import { Injectable } from '@angular/core';
 
 export interface Subtopic {
   title: string;
   content: {
     explanation: string;
-    resources?: {
-      wikipedia?: Link[];
-      youtube?: Link[];
-      web?: Link[];
-    };
+    resources?: any;
     activities?: string[];
     examples?: string[];
   };
 }
+
 
 export interface Topic {
   title: string;
   subtopics: Subtopic[];
 }
 
+
 export interface Section {
   id: string;
   title: string;
   topics: Topic[];
 }
+
 
 export interface StudyPlan {
   planTitle: string;
@@ -40,12 +33,8 @@ export interface StudyPlan {
   providedIn: 'root',
 })
 export class StudyPlanService {
-  /**
-   * This is our mock JSON-like data. In a real app, you might fetch this
-   * from a server via HttpClient or load from a file.
-   */
-  private studyPlan: StudyPlan = {
-    planTitle: '🎵 Plan de Estudios Producción Musical',
+  private studyPlan = {
+    planTitle: "🎵Plan de Estudios Producción Musical",
     sections: [
       {
         id: "fundamentals",
@@ -139,6 +128,21 @@ export class StudyPlanService {
                     "Diseñar pad atmosférico con 3 osciladores"
                   ]
                 }
+              },
+              {
+                title: "Tipos de Onda",
+                content: {
+                  explanation: "Diferentes formas de onda: Senoidal, Cuadrada, Triangular, Diente de Sierra. Características y usos en síntesis.",
+                  resources: {
+                    wikipedia: [
+                      { name: "Forma de onda", url: "https://es.wikipedia.org/wiki/Forma_de_onda" }
+                    ]
+                  },
+                  activities: [
+                    "Crear diferentes sonidos utilizando cada tipo de onda",
+                    "Analizar el espectro de frecuencias de cada forma de onda"
+                  ]
+                }
               }
             ]
           }
@@ -179,6 +183,21 @@ export class StudyPlanService {
                   activities: [
                     "Aplicar sidechain con Fruity Limiter",
                     "Crear cadena de efectos para percusión"
+                  ]
+                }
+              },
+              {
+                title: "Compresores",
+                content: {
+                  explanation: "Uso de compresores para controlar la dinámica: ataque, liberación, umbral y relación de compresión.",
+                  resources: {
+                    wikipedia: [
+                      { name: "Compresor (audio)", url: "https://es.wikipedia.org/wiki/Compresor_(audio)" }
+                    ]
+                  },
+                  activities: [
+                    "Aplicar compresión en una pista de voz",
+                    "Comparar diferentes tipos de compresores: VCA, FET, Opto"
                   ]
                 }
               }
@@ -225,6 +244,62 @@ export class StudyPlanService {
                   activities: [
                     "Producir track principal con estructura completa",
                     "Crear versión radio edit y extended mix"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "sampling",
+        title: "Técnicas de Sampling",
+        topics: [
+          {
+            title: "Introducción al Sampling",
+            subtopics: [
+              {
+                title: "Conceptos básicos de Sampling",
+                content: {
+                  explanation: "Exploración de las técnicas de sampling, desde la captura de sonidos hasta su procesamiento y manipulación en la producción musical. Técnicas como la selección de muestras, la manipulación de tiempo y tono, y la creatividad al integrar samples en la música.",
+                  resources: {
+                    wikipedia: [
+                      { name: "Sampling (música)", url: "https://es.wikipedia.org/wiki/Sampling_(m%C3%BAsica)" }
+                    ],
+                    web: [
+                      { name: "Guía de Sampling en producción musical", url: "https://www.izotope.com/en/learn/understanding-chords-and-scales-in-music-production.html" }
+                    ]
+                  },
+                  activities: [
+                    "Crear un beat utilizando un sample de una canción (respetando derechos de autor o utilizando muestras libres de derechos)",
+                    "Experimentar con la manipulación de un sample: cambiar su pitch, tempo y aplicar efectos."
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "sound-selection",
+        title: "Selección de Sonido en Producción Musical",
+        topics: [
+          {
+            title: "Selección de Sonidos y Samples",
+            subtopics: [
+              {
+                title: "Eligiendo los sonidos adecuados",
+                content: {
+                  explanation: "La importancia de elegir los sonidos correctos para cada proyecto. Técnicas para seleccionar samples, sintetizadores y efectos que complementen la visión creativa y el género musical. Cómo reconocer la calidad de un sonido y su impacto en la mezcla final.",
+                  resources: {
+                    web: [
+                      { name: "Selección de sonidos en la producción musical", url: "https://www.attackmagazine.com/production/production-techniques/sound-selection-the-most-important-part-of-your-production/" },
+                      { name: "Cómo seleccionar sonidos para la mezcla", url: "https://www.soundonsound.com/techniques/sound-selection" }
+                    ]
+                  },
+                  activities: [
+                    "Escuchar diferentes muestras de sonidos y elegir los más adecuados para una canción específica.",
+                    "Crear una lista de sonidos favoritos (samples, sintetizadores) y organizarlos por categorías: Bass, Percusión, Leads, Pads, etc."
                   ]
                 }
               }
